@@ -53,15 +53,13 @@ class MainPage(webapp2.RequestHandler):
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.write('CMPS 121 - webapp2 testing server')
 
-     db = connect_to_cloudsql()
-     #cursor = db.cursor()
-     #cursor.execute('SHOW VARIABLES')
+        db = connect_to_cloudsql()
+        cursor = db.cursor()
+        cursor.execute('SHOW VARIABLES')
 
-##     for r in cursor.fetchall():
-##         def get(self):
-##            self.response.headers['Content-Type'] = 'application/json'
-##            self.response.write(json.dumps(dict(cat=4, dog=4, bird=2, spider=8)))
-##            self.response.write('{}\n'.format(r))
+        for r in cursor.fetchall():
+            def get(self):
+                self.response.write('{}\n'.format(r))
 
 class GetListPage(webapp2.RequestHandler):
     """
