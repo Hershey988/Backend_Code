@@ -1,4 +1,5 @@
-from google.appengine.ext import ndb
+#from google.appengine.ext import ndb
+#from bs4 import BeautifulSoup
 import os
 import MySQLdb
 import webapp2
@@ -50,6 +51,7 @@ class MainPage(webapp2.RequestHandler):
     This class takes care of the main page on a web interface. 
     """
     def get(self):
+        #soup = BeautifulSoup(page.content, 'html.parser')
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.write('CMPS 121 - webapp2 testing server')
 
@@ -78,39 +80,59 @@ class GetListPage(webapp2.RequestHandler):
         self.response.write(json.dumps(dict(name=w, idd=x, cat=4, dog=4, bird=2, spider=8)))
 
 
-class SendMsgPage(webapp2.RequestHandler):
+class LogInPage(webapp2.RequestHandler):
+    def get(self):
+        userID = self.request.get('userID', default_value='')
+
+        db = connect_to_cloudsql()
+        cursor = db.cursor()
+        namedb = "USE Wheysted;"
+        cursor.execute(namedb)
+
+        check = "SELECT userID FROM Wheysted.user WHERE userID LIKE ('%s');" % (userID)
+        query = cursor.execute(check)
+        if query != 1:
+            self.response.headers['Content-Type'] = 'application/json'
+            self.response.write(json.dumps(dict(code="ADD")))
+        else    
+            self.response.headers['Content-Type'] = 'application/json'
+            self.response.write(json.dumps(dict(code="EXIST")))
+
+
+class AddUserPage(webapp2.RequestHandler):       
     def post(self):
-        sender = self.request.get('sender', default_value='')
-        recipient = self.request.get('recipient', default_value='')
-        msg = self.request.get('message', default_value='')
+        fName = self.request.get('fname', default_value='')
+        lname = self.request.get('lname', default_value='')
+        userID = self.request.get('userID', default_value='')
 
         
         db = connect_to_cloudsql()
         cursor = db.cursor()
-        namedb = "USE test;"
+        namedb = "USE Wheysted;"
         cursor.execute(namedb)
         # Prepare SQL query to INSERT a record into the database.
-        if sender != '' or msg != '':
-            sql = "INSERT INTO user(name, id) values ('%s', '%s');" % (sender, msg)
+        if fname != '' and lname != '' and userID != '':
+            sql = "INSERT INTO user(userID) values ('%s');" % (userID)
             try:
                # Execute the SQL command
                cursor.execute(sql)
                # Commit your changes in the database
                db.commit()
-               self.response.write("Done adding")
+               self.response.write("SUCCESSFUL: Done adding")
             except:
                # Rollback in case there is any error
-               self.response.write("rolling back")
+               self.response.write("THERE WAS AN ERROR: rolling back")
                db.rollback()
                
                  
-               self.response.write("ok")
+               #self.response.write("ok")
                db.close()
         else:
-            self.response.write("SOMETHING WENT WRONG")
+            self.response.write("600: USER or ID is not defines")
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/get_list', GetListPage),
-    ('/send_msg', SendMsgPage),
+    ('/login', LoginPage),
+    ('/adduser', AddUserPage),
 ], debug=True)
