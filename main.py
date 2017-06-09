@@ -110,10 +110,11 @@ class New_Login(webapp2.RequestHandler):
         cursor = db.cursor()
         cursor.execute('SHOW VARIABLES')
 
+class AddUserPage(webapp2.RequestHandler):       
     def post(self):
-        sender = self.request.get('sender', default_value='')
-        recipient = self.request.get('recipient', default_value='')
-        msg = self.request.get('message', default_value='')
+        fName = self.request.get('fname', default_value='')
+        lname = self.request.get('lname', default_value='')
+        userID = self.request.get('userID', default_value='')
 
         #Either add to the DB or Delete from it
         if ADD:
@@ -306,7 +307,6 @@ class ProfilePage(webapp2.RequestHandler):
         except:
             db.rollback()
         db.close()       
-
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
